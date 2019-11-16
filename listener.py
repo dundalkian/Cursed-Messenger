@@ -1,9 +1,12 @@
 import json
 import os
+import sys
 from configparser import ConfigParser
 
 from fbchat import Client, log
 from fbchat.models import *
+
+import display
 
 
 def config(filename=sys.path[0] + '/config.ini', section='facebook credentials'):
@@ -29,8 +32,8 @@ def config(filename=sys.path[0] + '/config.ini', section='facebook credentials')
 
 class CursedBot(Client):
     def onMessage(self, author_id, message_object, thread_id, thread_type, **kwargs):
-        #TODO I think there is a better/easier way to call super now?
-        super(CursedBot, self).onMessage(author_id=author_id, message_object=message_object, thread_id=thread_id, thread_type=thread_type, **kwargs)
+        super(CursedBot, self).onMessage(author_id, message_object, thread_id, thread_type, **kwargs)
+
 
 def startupClient(email, password):
     try:
@@ -39,7 +42,7 @@ def startupClient(email, password):
     except FileNotFoundError:
         session_cookies = None
 
-    client = HydroBot(email, password, session_cookies=session_cookies)
+    client = CursedBot(email, password, session_cookies=session_cookies)
     with open("session.txt", "w") as session:
         session.write(json.dumps(client.getSession()))
     return client
@@ -48,7 +51,8 @@ def startupClient(email, password):
 
 
 ### Reving up the engines ###
-creds = config()
-print(creds)
-client = startupClient(creds['email'], creds['password'])
-client.listen()
+if __name__ == '__main__':
+    creds = config()
+    print(creds)
+    client = startupClient(creds['email'], creds['password'])
+    client.listen()
